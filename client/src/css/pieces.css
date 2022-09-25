@@ -1,0 +1,59 @@
+.piece{
+    image-rendering: auto;
+    position: absolute;
+    width: 12.5%;
+    height: 12.5%;
+    background-size: 100%;
+    left: 0;
+    top: 0;
+    margin: 0;
+}
+
+.bb{
+    background-image: url('../assets/pieces/bb.png');
+}
+
+.bk{
+    background-image: url('../assets/pieces/bk.png');
+}
+
+.bkn{
+    background-image: url('../assets/pieces/bkn.png');
+}
+
+.bp{
+    background-image: url('../assets/pieces/bp.png');
+}
+
+.bq{
+    background-image: url('../assets/pieces/bq.png');
+}
+
+.br{
+    background-image: url('../assets/pieces/br.png');
+}
+
+.wb{
+    background-image: url('../assets/pieces/wb.png');
+}
+
+.wk{
+    background-image: url('../assets/pieces/wk.png');
+}
+
+.wkn{
+    background-image: url('../assets/pieces/wkn.png');
+}
+
+.wp{
+    background-image: url('../assets/pieces/wp.png');
+}
+
+.wq{
+    background-image: url('../assets/pieces/wq.png');
+}
+
+.wr{
+    background-image: url('../assets/pieces/wr.png');
+}
+

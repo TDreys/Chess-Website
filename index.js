@@ -1,7 +1,7 @@
 const express = require('express');
 const path = require('path')
 const http = require('http')
-const gameSocket = require('./controllers/gameSocket.js')
+const gameSocket = require('./controllers/serverGameSocket.js')
 
 const PORT = 5000 || process.env.PORT;
 

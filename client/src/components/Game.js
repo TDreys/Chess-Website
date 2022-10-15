@@ -1,11 +1,13 @@
 import {useState, useEffect, useRef} from 'react';
 import Board from './chessBoard/Board'
 import '../css/styles.css'
-import {socket, connect} from '../services/socketService'
+import * as socket from '../services/clientSocketService'
 
 function Game (){
 
     const ref = useRef(null)
+
+    const [controlState, setControlState] = useState('waiting')
 
     const [pieces, setPieces] = useState([
         {name: 'wr', position: [0,0]},
@@ -14,8 +16,27 @@ function Game (){
         {name: 'bp', position: [2,6]}
     ])
 
+    function play(){
+        socket.connect()
+        setControlState('settingUp')
+    }
+
+    function createGame(){
+        socket.createGame()
+        //todo validate connection
+        setControlState('playing')
+    }
+
+    async function joinGame(){
+        let roomID = document.getElementById('roomIDInput').value
+        socket.joinGame(roomID)
+        socket.roomID = roomID
+        //todo validate connection
+        setControlState('playing')
+    }
+
     function test(){
-        
+
     }
 
     useEffect(() => {
@@ -34,8 +55,17 @@ function Game (){
         <div ref={ref} className='game'>
             <Board pieces = {pieces} />
             <div className='gameInfo'>
-                <button onClick={connect}>New Game</button>
-                <button>Join Game</button>
+                {controlState === 'waiting' && <button onClick={play}>Play</button>}
+                {controlState === 'settingUp' && 
+                <>
+                    <button onClick={createGame}>New Game</button>
+                    <div>
+                        <input id='roomIDInput' placeholder='Room Code' type="text" />
+                        <button onClick={joinGame}>Join Game</button>
+                    </div>
+                </>
+                }
+                {controlState === 'playing' && <></>}
             </div>
         </div>
     );

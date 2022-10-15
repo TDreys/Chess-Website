@@ -88,6 +88,7 @@ export default function Board(props) {
                 bubbles: true,
             })
             ref.current.dispatchEvent(event)
+
         }
         active = false;
     }

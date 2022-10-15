@@ -15,12 +15,7 @@ function Game (){
     ])
 
     function test(){
-        // setPieces([
-        //     {name: 'wr', position: [0,0]},
-        //     {name: 'wk', position: [1,0]},
-        //     {name: 'wb', position: [2,0]},
-        //     {name: 'bp', position: [2,6]}
-        // ])
+        
     }
 
     useEffect(() => {

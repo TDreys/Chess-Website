@@ -9,6 +9,14 @@
     margin: 0;
 }
 
+.piece:hover{
+    cursor:grab;
+}
+
+.piece:active{
+    cursor: grabbing;
+}
+
 .bb{
     background-image: url('../assets/pieces/bb.png');
 }

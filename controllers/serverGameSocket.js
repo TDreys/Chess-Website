@@ -2,6 +2,7 @@ const chess = require('chess');
 const socketio = require('socket.io');
 
 currentGames = {}
+io = null;
 
 class ChessGame{
     game = null;
@@ -21,7 +22,7 @@ class Player{
 }
 
 function createSocket(server){
-    let io = socketio(server, {
+    io = socketio(server, {
         cors: {
             origin: ['*']
         }
@@ -47,8 +48,10 @@ function handleCreateGame(){
     this.join(gameID)
     currentGames[gameID] = new ChessGame()
     currentGames[gameID].player1.ready = false
+    currentGames[gameID].player1.id = this.id
 
     this.emit('gameID', gameID)
+    console.log('game id sent')
 }
 
 function startGame(gameID){
@@ -59,8 +62,10 @@ function startGame(gameID){
     })
 
     currentGames[gameID].game = gameClient
+    console.log('game start')
 
     //send to players
+    io.to(gameID).emit('game start',gameClient.status)
 }
 
 function handleReady(gameID, ready){
@@ -75,6 +80,7 @@ function handleReady(gameID, ready){
 function handleJoinGame(gameID){
     if(currentGames[gameID] != null){
         currentGames[gameID].player2.ready = false
+        currentGames[gameID].player2.id = this.id
         this.join(gameID)
     }
 }

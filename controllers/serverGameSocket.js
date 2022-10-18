@@ -65,7 +65,7 @@ function startGame(gameID){
     console.log('game start')
 
     //send to players
-    io.to(gameID).emit('game start',gameClient.status)
+    io.to(gameID).emit('game start',gameClient.getStatus())
 }
 
 function handleReady(gameID, ready){

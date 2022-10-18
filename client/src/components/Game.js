@@ -7,13 +7,7 @@ function Game (){
 
     const ref = useRef(null)
 
-    const [pieces, setPieces] = useState([
-        {name: 'wr', position: [0,0]},
-        {name: 'wk', position: [1,0]},
-        {name: 'wb', position: [2,0]},
-        {name: 'bp', position: [2,6]}
-    ])
-
+    const [pieces, setPieces] = useState([])
     const [controlState, setControlState] = useState('waiting')
     const [ready, setReady] = useState(false)
     const [socket, setSocket] = useState(null);
@@ -30,8 +24,7 @@ function Game (){
 
         newsocket.on('game start', (arg) => {
             setControlState('playing')
-
-            //set pieces
+            setPieces(gameStatusToPieces(arg))
         })
 
         setSocket(newsocket)
@@ -54,6 +47,20 @@ function Game (){
     const readyUp = function(){
         socket.emit('ready', gameID, !ready)
         setReady(!ready)
+    }
+
+    const gameStatusToPieces = function(status){
+        let pieces = []
+        status.board.squares.forEach((square, i) => {
+            if(square.piece != null){
+                let rank = square.rank - 1
+                let file = square.file.charCodeAt(0) - 97
+                let name = (square.piece.side.name === 'white' ? 'w':'b') + square.piece.notation
+                pieces[i] = {name: name, position:[file,rank]}
+            }
+        });
+
+        return pieces
     }
     
     const movePiece = function(){

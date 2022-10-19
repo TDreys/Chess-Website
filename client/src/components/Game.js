@@ -7,7 +7,7 @@ function Game (){
 
     const ref = useRef(null)
 
-    const [pieces, setPieces] = useState([])
+    const [status, setStatus] = useState(null)
     const [controlState, setControlState] = useState('waiting')
     const [ready, setReady] = useState(false)
     const [socket, setSocket] = useState(null);
@@ -15,16 +15,21 @@ function Game (){
 
     const connect = function(){
         let newsocket = socketIOClient('http://localhost:5000',{ transports : ['websocket'] })
-        console.log('connected')
     
         newsocket.on('gameID', (arg) => {
-            console.log('game id received')
             setGameID(arg)
         })
 
-        newsocket.on('game start', (arg) => {
+        newsocket.on('game start', () => {
             setControlState('playing')
-            setPieces(gameStatusToPieces(arg))
+        })
+
+        newsocket.on('status', (arg) => {
+            setStatus(arg)
+        })
+
+        newsocket.on('invalidMove', () => {
+
         })
 
         setSocket(newsocket)
@@ -48,40 +53,44 @@ function Game (){
         socket.emit('ready', gameID, !ready)
         setReady(!ready)
     }
+    
+    const movePiece = (e) => {
+        console.log(e.detail , status)
+        let dest = [String.fromCharCode(e.detail.dest[0] + 97), e.detail.dest[1] + 1]
+        let src = [String.fromCharCode(e.detail.source[0] + 97), e.detail.source[1] + 1]
+        for (const [key, value] of Object.entries(status.notatedMoves)) {
+            if(value.dest.file === dest[0] && value.dest.rank === dest[1] && value.src.file == src[0] && value.src.rank === src[1]){
+                console.log(key)
+                socket.emit('move', gameID, key)
+            }
+        }
+    }
 
     const gameStatusToPieces = function(status){
         let pieces = []
-        status.board.squares.forEach((square, i) => {
-            if(square.piece != null){
-                let rank = square.rank - 1
-                let file = square.file.charCodeAt(0) - 97
-                let name = (square.piece.side.name === 'white' ? 'w':'b') + square.piece.notation
-                pieces[i] = {name: name, position:[file,rank]}
-            }
-        });
-
+        if(status != null){
+            status.board.squares.forEach((square) => {
+                if(square.piece != null){
+                    let rank = square.rank - 1
+                    let file = square.file.charCodeAt(0) - 97
+                    let notation = (square.piece.side.name == 'white' ? 'w':'b') + square.piece.notation
+                    pieces.push({notation: notation, transform:[file,rank], currentPosition:[file,rank]})
+                }
+            });
+        }
         return pieces
-    }
-    
-    const movePiece = function(){
-        
-    }
-
-    function test(){
-
     }
 
     useEffect(() => {
-
         const gameDiv = ref.current
 
-        gameDiv.addEventListener('pieceDropped', test, true)
+        gameDiv.addEventListener('pieceDropped', movePiece, true)
         
         return () => {
-            gameDiv.removeEventListener('pieceDropped', test, true)
+            gameDiv.removeEventListener('pieceDropped', movePiece, true)
         }
 
-    },[]);
+    },[movePiece]);
 
     let gameControls = null;
     if(controlState === 'waiting'){
@@ -120,7 +129,7 @@ function Game (){
 
     return (
         <div ref={ref} className='game'>
-            <Board pieces = {pieces} />
+            <Board pieces = {gameStatusToPieces(status)} />
             {gameControls}
         </div>
     );

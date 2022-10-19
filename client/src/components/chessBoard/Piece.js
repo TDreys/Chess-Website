@@ -1,16 +1,16 @@
-import React , {useState, useRef, useEffect} from 'react'
+import React from 'react'
 
 export default function Piece(props) {
 
     const style = {
-        transform: 'translate('+ props.position[0] * 100 +'%,'+ (700 - (props.position[1] * 100)) + '%)',
+        transform: 'translate('+ props.transform[0] * 100 +'%,'+ (700 - (props.transform[1] * 100)) + '%)',
     }
 
     return (
         <div
-            data-key = {props.itemKey}
+            data-pieceitemsindex = {props.pieceItemsIndex}
             style={style} 
-            className={'piece ' + props.name}> 
+            className={'piece ' + props.notation}> 
         </div>
     )
 }

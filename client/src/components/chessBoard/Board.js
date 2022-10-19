@@ -1,4 +1,4 @@
-import React, { useEffect, useRef , useState }from 'react'
+import React, { useCallback, useEffect, useRef , useState }from 'react'
 import '../../css/pieces.css'
 import Piece from './Piece'
 
@@ -6,14 +6,16 @@ export default function Board(props) {
 
     const ref = useRef(null)
 
-    var active = false
-    var target = null
+    //var active = false
+    //var clickTarget = null
 
-    const [pieces, setPieces] = useState(structuredClone(props.pieces))
+    const [pieceItems, setPieceItems] = useState([])
+    const [active, setActive] = useState(false)
+    const [clickTarget, setClickTarget] = useState(null)
 
     //set state when props change
     useEffect(() => {
-        setPieces(structuredClone(props.pieces))
+        setPieceItems(structuredClone(props.pieces))
     },[props.pieces])
 
     //set state on init
@@ -30,24 +32,26 @@ export default function Board(props) {
             boardDiv.removeEventListener("mousemove", drag ,false);
         }
         
-      },[]);
+      });
 
     const dragStart = (e) => {
         if (e.target.className.includes('piece')) {
-            var mouseX = e.clientX - ref.current.offsetLeft 
-            var mouseY = e.clientY - ref.current.offsetTop
+            let mouseX = e.clientX - ref.current.offsetLeft 
+            let mouseY = e.clientY - ref.current.offsetTop
 
-            target = e.target
-            var xPos = (mouseX - target.offsetWidth/2)/(ref.current.offsetWidth/8)
-            var yPos = 7-((mouseY - target.offsetHeight/2)/(ref.current.offsetHeight/8))
+            setClickTarget(e.target)
+            let tempClickTarget = e.target
 
-            setPieces(pieces => {
+            let xPos = (mouseX - tempClickTarget.offsetWidth/2)/(ref.current.offsetWidth/8)
+            let yPos = 7-((mouseY - tempClickTarget.offsetHeight/2)/(ref.current.offsetHeight/8))
+
+            setPieceItems(pieces => {
                 let updated = structuredClone(pieces)
-                updated[target.dataset.key].position = [xPos, yPos]
+                updated[tempClickTarget.dataset.pieceitemsindex].transform = [xPos, yPos]
                 return updated
             })
 
-            active = true;
+            setActive(true);
         }
     }
 
@@ -58,12 +62,12 @@ export default function Board(props) {
             var mouseX = e.clientX - ref.current.offsetLeft 
             var mouseY = e.clientY - ref.current.offsetTop 
 
-            var xPos = (mouseX - target.offsetWidth/2)/(ref.current.offsetWidth/8)
-            var yPos = 7-((mouseY - target.offsetHeight/2)/(ref.current.offsetHeight/8))
+            var xPos = (mouseX - clickTarget.offsetWidth/2)/(ref.current.offsetWidth/8)
+            var yPos = 7-((mouseY - clickTarget.offsetHeight/2)/(ref.current.offsetHeight/8))
 
-            setPieces(pieces => {
+            setPieceItems(pieces => {
                 let updated = structuredClone(pieces)
-                updated[target.dataset.key].position = [xPos, yPos]
+                updated[clickTarget.dataset.pieceitemsindex].transform = [xPos, yPos]
                 return updated
             })
         }
@@ -77,26 +81,35 @@ export default function Board(props) {
             var xPos = Math.floor(mouseX/(ref.current.offsetWidth/8))
             var yPos = 7-Math.floor(mouseY/(ref.current.offsetHeight/8))
 
-            setPieces(pieces => {
-                let updated = structuredClone(pieces)
-                updated[target.dataset.key].position = [xPos, yPos]
-                return updated
-            })
-
             const event = new CustomEvent('pieceDropped',{
-                detail: {text:'rah'},
+                detail: {
+                    source:pieceItems[clickTarget.dataset.pieceitemsindex].currentPosition,
+                    dest:[xPos, yPos]
+                },
                 bubbles: true,
             })
             ref.current.dispatchEvent(event)
 
+            setPieceItems(pieces => {
+                let updated = structuredClone(pieces)
+                updated[clickTarget.dataset.pieceitemsindex].transform = [xPos, yPos]
+                updated[clickTarget.dataset.pieceitemsindex].currentPosition = [xPos, yPos]
+                return updated
+            })
+
         }
-        active = false;
+        setActive(false);
     }
 
     return (
         <div ref = {ref} className='board'>
-            {pieces.map((piece, i) => {
-                return <Piece key={i} itemKey={i} name = {piece.name} position = {piece.position}/>
+            {pieceItems.map((piece, i) => {
+                return <Piece 
+                    key={i} 
+                    pieceItemsIndex={i} 
+                    notation = {piece.notation} 
+                    transform = {piece.transform}
+                />
             })}
         </div>
     )

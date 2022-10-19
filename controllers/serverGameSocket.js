@@ -65,7 +65,8 @@ function startGame(gameID){
     console.log('game start')
 
     //send to players
-    io.to(gameID).emit('game start',gameClient.getStatus())
+    io.to(gameID).emit('game start')
+    io.to(gameID).emit('status', gameClient.getStatus())
 }
 
 function handleReady(gameID, ready){
@@ -90,8 +91,9 @@ function handleDisconnect(){
 
 }
 
-function handleMove(){
-
+function handleMove(gameID, move){
+    currentGames[gameID].game.move(move)
+    io.to(gameID).emit('status', currentGames[gameID].game.getStatus())
 }
 
 module.exports = {

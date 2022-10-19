@@ -1,13 +1,10 @@
-import React, { useCallback, useEffect, useRef , useState }from 'react'
+import React, { useEffect, useRef , useState }from 'react'
 import '../../css/pieces.css'
 import Piece from './Piece'
 
 export default function Board(props) {
 
     const ref = useRef(null)
-
-    //var active = false
-    //var clickTarget = null
 
     const [pieceItems, setPieceItems] = useState([])
     const [active, setActive] = useState(false)

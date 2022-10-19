@@ -95,42 +95,44 @@ function Game (){
     let gameControls = null;
     if(controlState === 'waiting'){
         gameControls = (
-            <div className='gameInfo'>
+            <>
                 <button onClick={connect}>Play</button>
-            </div>
+            </>
         )
     }
     else if(controlState === 'settingUp'){
         gameControls = (
-            <div className='gameInfo'>
+            <>
                 <button onClick={createGame}>New Game</button>
                 <div>
                     <input id='gameIDInput' placeholder='Game Code' type="text" />
                     <button onClick={() => {joinGame(document.getElementById('gameIDInput').value)}}>Join Game</button>
                 </div>
-            </div>
+            </>
         )
     }
     else if(controlState === 'readying'){
         gameControls = (
-            <div className='gameInfo'>
+            <>
                 <h1>{gameID}</h1>
                 <button onClick={readyUp}>{ready ? 'Unready' : 'Ready Up'}</button>
-            </div>
+            </>
         )
     }
     else if(controlState === 'playing'){
         gameControls = (
-            <div className='gameInfo'>
-
-            </div>
+            <></>
         )
     }
 
     return (
-        <div ref={ref} className='game'>
-            <Board pieces = {gameStatusToPieces(status)} />
-            {gameControls}
+        <div ref={ref} className='row'>
+            <div className='col-6 align-self-center justify-content-center'>
+                <Board pieces = {gameStatusToPieces(status)} />
+            </div>
+            <div className='gameInfo col-6 d-flex align-self-center justify-content-center'>
+                {gameControls}
+            </div>
         </div>
     );
 }

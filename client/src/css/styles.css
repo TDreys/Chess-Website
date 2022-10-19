@@ -8,9 +8,6 @@
     min-width: 65vw;
 }
 
-#root{ 
-    display: flex;
-}
 
 body{
     max-width: 100%;
@@ -21,33 +18,23 @@ body{
 .board{
     position: relative;
     border-radius: 8px;
-    margin-top: 4vh;
-    margin-left: 7%;
     aspect-ratio: 1/1;
-    height: 90%;
+    height: auto;
+    max-width: 100%;
+    max-height: 95vh;
     background-size: 100%;
     image-rendering: pixelated;
     background-image: url('../assets/board.png');
 }
 
-/* .board:after{
-    content: '';
-    display: block;
-    padding-bottom: 100%;
+/* .board{
+    position: relative;
+    border-radius: 8px;
+    aspect-ratio: 1/1;
+    background-size: 100%;
+    image-rendering: pixelated;
+    background-image: url('../assets/board.png');
 } */
-
-.navBar{
-    display: grid;
-    min-width: 100px;
-    width: 10%;
-    border-style: solid;
-}
-
-.gameInfo{
-    width: 100%;
-    margin: 30px;
-    display: grid;
-}
 
 
 

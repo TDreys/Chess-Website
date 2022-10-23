@@ -78,19 +78,24 @@ export default function Board(props) {
             var xPos = Math.floor(mouseX/(ref.current.offsetWidth/8))
             var yPos = 7-Math.floor(mouseY/(ref.current.offsetHeight/8))
 
-            const event = new CustomEvent('pieceDropped',{
-                detail: {
-                    source:pieceItems[clickTarget.dataset.pieceitemsindex].currentPosition,
-                    dest:[xPos, yPos]
-                },
-                bubbles: true,
-            })
-            ref.current.dispatchEvent(event)
+            let source = pieceItems[clickTarget.dataset.pieceitemsindex].currentPosition
+            let dest = [xPos, yPos]
+
+            if(source != dest) {
+                const event = new CustomEvent('pieceDropped',{
+                    detail: {
+                        source:source,
+                        dest:dest
+                    },
+                    bubbles: true,
+                })
+                ref.current.dispatchEvent(event)
+            }
 
             setPieceItems(pieces => {
                 let updated = structuredClone(pieces)
-                updated[clickTarget.dataset.pieceitemsindex].transform = [xPos, yPos]
-                updated[clickTarget.dataset.pieceitemsindex].currentPosition = [xPos, yPos]
+                updated[clickTarget.dataset.pieceitemsindex].transform = dest
+                updated[clickTarget.dataset.pieceitemsindex].currentPosition = dest
                 return updated
             })
 

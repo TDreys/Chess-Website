@@ -8,6 +8,7 @@ class ChessGame{
     game = null;
     player1 = null;
     player2 = null;
+    turn = null;
 
     constructor(){
         this.player1 = new Player();
@@ -18,7 +19,6 @@ class ChessGame{
 class Player{
     id = null;
     ready = null;
-    side = null;
 }
 
 function createSocket(server){
@@ -38,7 +38,6 @@ function createSocket(server){
 }
 
 function handleCreateGame(){
-    //create id
     do{
         var firstPart = (Math.random() * 46656) | 0;
         var secondPart = (Math.random() * 46656) | 0;
@@ -51,22 +50,15 @@ function handleCreateGame(){
     currentGames[gameID].player1.id = this.id
 
     this.emit('gameID', gameID)
-    console.log('game id sent')
 }
 
 function startGame(gameID){
     gameClient = chess.create({ PGN : true })
-
-    gameClient.on('check', (move) => {
-        console.log('check')
-    })
-
     currentGames[gameID].game = gameClient
-    console.log('game start')
+    currentGames[gameID].turn = currentGames[gameID].player1.id
 
     //send to players
-    io.to(gameID).emit('game start')
-    io.to(gameID).emit('status', gameClient.getStatus())
+    io.to(gameID).emit('game start', gameClient.getStatus(), currentGames[gameID].turn)
 }
 
 function handleReady(gameID, ready){
@@ -92,8 +84,21 @@ function handleDisconnect(){
 }
 
 function handleMove(gameID, move){
-    currentGames[gameID].game.move(move)
-    io.to(gameID).emit('status', currentGames[gameID].game.getStatus())
+    //check correct turn
+    if(this.id == currentGames[gameID].turn){
+        //check valid move
+        try {
+            currentGames[gameID].game.move(move)
+            io.to(gameID).emit('move', currentGames[gameID].game.getStatus())
+            currentGames[gameID].turn == currentGames[gameID].player1.id ? currentGames[gameID].turn = currentGames[gameID].player2.id:currentGames[gameID].turn = currentGames[gameID].player1.id
+        } 
+        catch (error) {
+            this.emit('invalidMove', currentGames[gameID].game.getStatus())
+        }
+    }
+    else{
+        this.emit('invalidMove', currentGames[gameID].game.getStatus())
+    }
 }
 
 module.exports = {

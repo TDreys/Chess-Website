@@ -21,20 +21,13 @@ body{
     aspect-ratio: 1/1;
     height: auto;
     max-width: 100%;
-    max-height: 95vh;
+    max-height: 90vh;
+    margin: auto;
     background-size: 100%;
     image-rendering: pixelated;
     background-image: url('../assets/board.png');
 }
 
-/* .board{
-    position: relative;
-    border-radius: 8px;
-    aspect-ratio: 1/1;
-    background-size: 100%;
-    image-rendering: pixelated;
-    background-image: url('../assets/board.png');
-} */
 
 
 

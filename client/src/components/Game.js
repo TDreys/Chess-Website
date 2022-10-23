@@ -1,7 +1,10 @@
 import {useState, useEffect, useRef} from 'react';
 import Board from './chessBoard/Board'
 import socketIOClient from "socket.io-client";
+import {Howl} from 'howler';
 import '../css/styles.css'
+import movePieceSound from '../assets/sounds/movePiece.wav'
+import moveErrorSound from '../assets/sounds/moveError.wav'
 
 function Game (){
 
@@ -12,6 +15,7 @@ function Game (){
     const [ready, setReady] = useState(false)
     const [socket, setSocket] = useState(null);
     const [gameID, setGameID] = useState(null);
+    const [isWhite, setIsWhite] = useState(true);
 
     const connect = function(){
         let newsocket = socketIOClient('http://localhost:5000',{ transports : ['websocket'] })
@@ -20,16 +24,26 @@ function Game (){
             setGameID(arg)
         })
 
-        newsocket.on('game start', () => {
+        newsocket.on('game start', (status, whiteID) => {
+            if(whiteID != newsocket.id){
+                console.log('is black')
+                setIsWhite(false)
+            }else{
+                console.log('is white')
+                setIsWhite(true)
+            }
+            setStatus(status)
             setControlState('playing')
         })
 
-        newsocket.on('status', (arg) => {
-            setStatus(arg)
+        newsocket.on('move', (status) => {
+            setStatus(status)
+            playSound(movePieceSound)
         })
 
-        newsocket.on('invalidMove', () => {
-
+        newsocket.on('invalidMove', (status) => {
+            setStatus(status)
+            playSound(moveErrorSound)
         })
 
         setSocket(newsocket)
@@ -38,14 +52,13 @@ function Game (){
 
     const createGame = function(){
         socket.emit('createGame')
-        //todo validate connection
         setControlState('readying')
     }
     
     const joinGame = function(gameID){
         socket.emit('joinGame', gameID)
         setGameID(gameID)
-        //todo validate connection
+        //todo validate game exists
         setControlState('readying')
     }
     
@@ -55,30 +68,15 @@ function Game (){
     }
     
     const movePiece = (e) => {
-        console.log(e.detail , status)
         let dest = [String.fromCharCode(e.detail.dest[0] + 97), e.detail.dest[1] + 1]
         let src = [String.fromCharCode(e.detail.source[0] + 97), e.detail.source[1] + 1]
+        let foundMove = null;
         for (const [key, value] of Object.entries(status.notatedMoves)) {
             if(value.dest.file === dest[0] && value.dest.rank === dest[1] && value.src.file == src[0] && value.src.rank === src[1]){
-                console.log(key)
-                socket.emit('move', gameID, key)
+                foundMove = key
             }
         }
-    }
-
-    const gameStatusToPieces = function(status){
-        let pieces = []
-        if(status != null){
-            status.board.squares.forEach((square) => {
-                if(square.piece != null){
-                    let rank = square.rank - 1
-                    let file = square.file.charCodeAt(0) - 97
-                    let notation = (square.piece.side.name == 'white' ? 'w':'b') + square.piece.notation
-                    pieces.push({notation: notation, transform:[file,rank], currentPosition:[file,rank]})
-                }
-            });
-        }
-        return pieces
+        socket.emit('move', gameID, foundMove)
     }
 
     useEffect(() => {
@@ -126,15 +124,37 @@ function Game (){
     }
 
     return (
-        <div ref={ref} className='row'>
-            <div className='col-6 align-self-center justify-content-center'>
-                <Board pieces = {gameStatusToPieces(status)} />
+        <div ref={ref} className='row mt-4'>
+            <div className='col-6 offset-1 align-self-center justify-content-center'>
+                <Board pieces = {gameStatusToPieces(status)} flipped={!isWhite}/>
             </div>
-            <div className='gameInfo col-6 d-flex align-self-center justify-content-center'>
+            <div className='col-3 d-flex align-self-center justify-content-center'>
                 {gameControls}
             </div>
         </div>
     );
+}
+
+const gameStatusToPieces = function(status){
+    let pieces = []
+    if(status != null){
+        status.board.squares.forEach((square) => {
+            if(square.piece != null){
+                let rank = square.rank - 1
+                let file = square.file.charCodeAt(0) - 97
+                let notation = (square.piece.side.name == 'white' ? 'w':'b') + square.piece.notation
+                pieces.push({notation: notation, transform:[file,rank], currentPosition:[file,rank]})
+            }
+        });
+    }
+    return pieces
+}
+
+const playSound = function(sound){
+    var soundToPlay = new Howl({
+        src: [sound]
+      });
+      soundToPlay.play();
 }
  
 export default Game;

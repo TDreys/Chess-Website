@@ -12,8 +12,15 @@ export default function Board(props) {
 
     //set state when props change
     useEffect(() => {
-        setPieceItems(structuredClone(props.pieces))
-    },[props.pieces])
+        let newPieces = structuredClone(props.pieces)
+        if(props.flipped){
+            newPieces.forEach(piece => {
+                piece.transform = [7 - piece.transform[0], 7 - piece.transform[1]]
+                piece.currentPosition = [7 - piece.currentPosition[0], 7 - piece.currentPosition[1]]
+            });
+        }
+        setPieceItems(newPieces)
+    },[props])
 
     //set state on init
     useEffect(() => {
@@ -81,11 +88,12 @@ export default function Board(props) {
             let source = pieceItems[clickTarget.dataset.pieceitemsindex].currentPosition
             let dest = [xPos, yPos]
 
-            if(source != dest) {
+            console.log(source, dest)
+            if(source[0] != dest[0] || source[1] != dest[1]) {
                 const event = new CustomEvent('pieceDropped',{
                     detail: {
-                        source:source,
-                        dest:dest
+                        source: props.flipped ? [7 - source[0], 7 - source[1]] : source,
+                        dest: props.flipped ? [7 - dest[0], 7 - dest[1]] : dest
                     },
                     bubbles: true,
                 })

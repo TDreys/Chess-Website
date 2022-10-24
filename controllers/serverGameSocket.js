@@ -49,7 +49,7 @@ function handleCreateGame(){
     currentGames[gameID].player1.ready = false
     currentGames[gameID].player1.id = this.id
 
-    this.emit('gameID', gameID)
+    this.emit('joined', true,  gameID)
 }
 
 function startGame(gameID){
@@ -76,6 +76,10 @@ function handleJoinGame(gameID){
         gameToHandle.player2.ready = false
         gameToHandle.player2.id = this.id
         this.join(gameID)
+        this.emit('joined', true, gameID)    
+    }
+    else{
+        this.emit('joined', false, gameID)
     }
 }
 

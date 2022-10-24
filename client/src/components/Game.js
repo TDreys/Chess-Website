@@ -23,9 +23,14 @@ function Game (){
 
     const connect = function(){
         let newsocket = socketIOClient('http://localhost:5000',{ transports : ['websocket'] })
-    
-        newsocket.on('gameID', (ID) => {
-            setGameID(ID)
+
+        newsocket.on('joined', (joined, gameID) => {
+            if(joined){
+                setGameID(gameID)
+                setControlState('readying')
+            }else{
+                console.log('failed connect')
+            }
         })
 
         newsocket.on('game start', (status, whiteID) => {
@@ -71,14 +76,10 @@ function Game (){
 
     const createGame = function(){
         socket.emit('createGame')
-        setControlState('readying')
     }
     
     const joinGame = function(gameID){
         socket.emit('joinGame', gameID)
-        setGameID(gameID)
-        //todo validate game exists
-        setControlState('readying')
     }
     
     const readyUp = function(){

@@ -62,18 +62,19 @@ function startGame(gameID){
 }
 
 function handleReady(gameID, ready){
-    let game = currentGames[gameID]
-    game.player1.id == this.id ? game.player1.ready = ready : game.player2.ready = ready
+    let gameToHandle = currentGames[gameID]
+    gameToHandle.player1.id == this.id ? gameToHandle.player1.ready = ready : gameToHandle.player2.ready = ready
 
-    if(game.player1.ready & game.player2.ready){
+    if(gameToHandle.player1.ready & gameToHandle.player2.ready){
         startGame(gameID)
     }
 }
 
 function handleJoinGame(gameID){
-    if(currentGames[gameID] != null){
-        currentGames[gameID].player2.ready = false
-        currentGames[gameID].player2.id = this.id
+    let gameToHandle = currentGames[gameID]
+    if(gameToHandle != null){
+        gameToHandle.player2.ready = false
+        gameToHandle.player2.id = this.id
         this.join(gameID)
     }
 }
@@ -84,20 +85,31 @@ function handleDisconnect(){
 }
 
 function handleMove(gameID, move){
+
+    let gameToHandle = currentGames[gameID]
+
     //check correct turn
-    if(this.id == currentGames[gameID].turn){
+    if(this.id == gameToHandle.turn){
         //check valid move
         try {
-            currentGames[gameID].game.move(move)
-            io.to(gameID).emit('move', currentGames[gameID].game.getStatus())
-            currentGames[gameID].turn == currentGames[gameID].player1.id ? currentGames[gameID].turn = currentGames[gameID].player2.id:currentGames[gameID].turn = currentGames[gameID].player1.id
+            let lastMove = gameToHandle.game.move(move)
+            let status = gameToHandle.game.getStatus()
+            io.to(gameID).emit('move', status, lastMove)
+
+            if(status.isCheckmate){
+                io.to(gameID).emit('game end', gameToHandle.turn)
+            }else if(status.isRepetition || status.isStalemate){
+                io.to(gameID).emit('game end', true)
+            }else{
+                gameToHandle.turn == gameToHandle.player1.id ? gameToHandle.turn = gameToHandle.player2.id : gameToHandle.turn = gameToHandle.player1.id
+            }
         } 
         catch (error) {
-            this.emit('invalidMove', currentGames[gameID].game.getStatus())
+            this.emit('invalidMove', gameToHandle.game.getStatus())
         }
     }
     else{
-        this.emit('invalidMove', currentGames[gameID].game.getStatus())
+        this.emit('invalidMove', gameToHandle.game.getStatus())
     }
 }
 

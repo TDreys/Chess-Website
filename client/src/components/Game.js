@@ -5,6 +5,10 @@ import {Howl} from 'howler';
 import '../css/styles.css'
 import movePieceSound from '../assets/sounds/movePiece.wav'
 import moveErrorSound from '../assets/sounds/moveError.wav'
+import moveCaptureSound from '../assets/sounds/moveCapture.wav'
+import moveCheckSound from '../assets/sounds/moveCheck.wav'
+import gameStartSound from '../assets/sounds/gameStart.wav'
+import gameEndSound from '../assets/sounds/gameEnd.wav'
 
 function Game (){
 
@@ -20,30 +24,45 @@ function Game (){
     const connect = function(){
         let newsocket = socketIOClient('http://localhost:5000',{ transports : ['websocket'] })
     
-        newsocket.on('gameID', (arg) => {
-            setGameID(arg)
+        newsocket.on('gameID', (ID) => {
+            setGameID(ID)
         })
 
         newsocket.on('game start', (status, whiteID) => {
-            if(whiteID != newsocket.id){
-                console.log('is black')
-                setIsWhite(false)
-            }else{
-                console.log('is white')
-                setIsWhite(true)
-            }
+            setIsWhite(whiteID == newsocket.id)
             setStatus(status)
             setControlState('playing')
+
+            playSound(gameStartSound)
         })
 
-        newsocket.on('move', (status) => {
+        newsocket.on('move', (status, lastMove) => {
             setStatus(status)
-            playSound(movePieceSound)
+
+            console.log(status.notatedMoves)
+
+            if(status.isCheck){
+                playSound(moveCheckSound)
+            }else if(lastMove.move.capturedPiece != null){
+                playSound(moveCaptureSound)
+            }else{
+                playSound(movePieceSound)
+            }
         })
 
         newsocket.on('invalidMove', (status) => {
             setStatus(status)
             playSound(moveErrorSound)
+        })
+
+        newsocket.on('game end', (winner) => {
+            if(winner == true){
+                console.log('draw')
+            }
+            else{
+                console.log(winner == newsocket.id ? 'you win' : ' you lose')
+            }
+            playSound(gameEndSound)
         })
 
         setSocket(newsocket)
